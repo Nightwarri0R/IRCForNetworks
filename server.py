@@ -8,7 +8,7 @@ from random import randint
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
-PORT = []
+PORT = 1234
 # Code found in: https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
@@ -22,11 +22,11 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 # Random seed to pick numbers which will be used later on to generate sockets
-seed(randint(0 , 30))
+'''seed(randint(0 , 50))
 
-for x in range(50):
+for x in range(100):
     PORT = randint(1000, 5000)
-    
+    print(PORT)'''
 
 # Bind, so server informs operating system that it's going to use given IP and port
 # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
@@ -93,7 +93,7 @@ while True:
             # That gives us new socket - client socket, connected to this given client only, it's unique for that client
             # The other returned object is ip/port set
             client_socket, client_address = server_socket.accept()
-
+            print(accept())
             # Client should send his name right away, receive it
             user = receive_message(client_socket)
 
@@ -131,6 +131,7 @@ while True:
             user = clients[notified_socket]
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:

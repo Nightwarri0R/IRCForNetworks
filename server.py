@@ -1,39 +1,43 @@
 import socket
 import select
 import threading 
-from random import seed
-from random import randint
+import sys
+import re
 
 
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
 PORT = 1234
+Channel= [] 
 # Code found in: https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
+def IRC()
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # SO_ - socket option
+    # SOL_ - socket option level
+    # Sets REUSEADDR (as a socket option) to 1 on socket
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-# SO_ - socket option
-# SOL_ - socket option level
-# Sets REUSEADDR (as a socket option) to 1 on socket
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Random seed to pick numbers which will be used later on to generate sockets
 
-# Random seed to pick numbers which will be used later on to generate sockets
+    # Bind, so server informs operating system that it's going to use given IP and port
+    # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
+    server_socket.bind((IP, PORT))
+    # This makes server listen to new connections
+    server_socket.listen()
 
-# Bind, so server informs operating system that it's going to use given IP and port
-# For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
-server_socket.bind((IP, PORT))
-# This makes server listen to new connections
-server_socket.listen()
+    # List of sockets for select.select()
+    sockets_list = [server_socket]
 
-# List of sockets for select.select()
-sockets_list = [server_socket]
+    # List of connected clients - socket as a key, user header and name as data
+    clients = {}
 
-# List of connected clients - socket as a key, user header and name as data
-clients = {}
+
+
 
 # print(f'Listening for connections on {IP}:{PORT}...')
 
@@ -129,7 +133,7 @@ while True:
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:
-
+            if PRIVATEMSG
                 # But don't sent it to sender
                 if client_socket != notified_socket:
 
@@ -145,3 +149,21 @@ while True:
 
         # Remove from our list of users
         del clients[notified_socket]
+
+
+
+'''Channels work in progress'''
+
+def  CreatingNewCH():
+    
+    str getName = receive_message(message) = re.split('\\b#\\b',string)[-1]
+
+    if getName == True
+        
+        for _ in Channel: 
+            if 
+        
+
+        newChannel = threading.Thread(# %%)
+    else: 
+        return

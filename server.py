@@ -14,7 +14,7 @@ Channel= []
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
-def IRC()
+def irc():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # SO_ - socket option
@@ -133,7 +133,6 @@ while True:
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:
-            if PRIVATEMSG
                 # But don't sent it to sender
                 if client_socket != notified_socket:
 
@@ -151,8 +150,10 @@ while True:
         del clients[notified_socket]
 
 
+#Different channels in progres running on different threads
 
-'''Channels work in progress'''
+
+
 
 def  CreatingNewCH():
     
@@ -160,10 +161,27 @@ def  CreatingNewCH():
 
     if getName == True
         
-        for _ in Channel: 
-            if 
-        
+        if getName not in Channel
 
-        newChannel = threading.Thread(# %%)
+            newChannels  = threading.Thread(name = getName, target= irc and receive_message)
+
+            newChannels.daemon = True 
+
+            newChannels.start()
+
+            Channel.append(newChannels)
+
+            elif getName in Channel 
+
+            ExistingChannle = threading.Thread(name= getName)
+            
+            ExistingChannle.start()
+            else: 
+                pass
+
+
+        
+        
     else: 
+        print('Try again ')
         return

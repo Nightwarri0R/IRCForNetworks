@@ -9,32 +9,32 @@ HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
 PORT = 1234
-Channel= [] 
+Channel= {}
 # Code found in: https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
-def irc():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # SO_ - socket option
-    # SOL_ - socket option level
-    # Sets REUSEADDR (as a socket option) to 1 on socket
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Random seed to pick numbers which will be used later on to generate sockets
+# SO_ - socket option
+# SOL_ - socket option level
+# Sets REUSEADDR (as a socket option) to 1 on socket
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    # Bind, so server informs operating system that it's going to use given IP and port
-    # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
-    server_socket.bind((IP, PORT))
-    # This makes server listen to new connections
-    server_socket.listen()
+# Random seed to pick numbers which will be used later on to generate sockets
 
-    # List of sockets for select.select()
-    sockets_list = [server_socket]
+# Bind, so server informs operating system that it's going to use given IP and port
+# For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
+server_socket.bind((IP, PORT))
+# This makes server listen to new connections
+server_socket.listen()
 
-    # List of connected clients - socket as a key, user header and name as data
-    clients = {}
+# List of sockets for select.select()
+sockets_list = [server_socket]
+
+# List of connected clients - socket as a key, user header and name as data
+clients = {}
 
 
 
@@ -156,32 +156,39 @@ while True:
 
 
 def  CreatingNewCH():
-    
-    str getName = receive_message(message) = re.split('\\b#\\b',string)[-1]
+    getName = ''
+    sucess = False
 
-    if getName == True
-        
-        if getName not in Channel
+    receive_message.message = re.split('\\b#\\b',getName)[-1]
+    print(receive_message)
+    sucess = True 
 
-            newChannels  = threading.Thread(name = getName, target= irc and receive_message)
-
-            newChannels.daemon = True 
-
-            newChannels.start()
-
-            Channel.append(newChannels)
-
-            elif getName in Channel 
-
-            ExistingChannle = threading.Thread(name= getName)
+    if sucess == True:
             
-            ExistingChannle.start()
+        if getName not in Channel:
+
+            new_channels  = threading.Thread(name = getName, target= create_channel and receive_message)
+
+            new_channels.daemon = True 
+
+            new_channels.start()
+
+            Channel.append(new_channels)
+        
+            elif threading.current_thread().name in Channel: 
+
+                ExistingChannel = threading.Thread(name= getName, target= irc and receive_message)
+            
+                ExistingChannel.start()
             else: 
                 pass
+            
+        else: 
+            print('Try again ')
+            return
 
-
-        
-        
-    else: 
-        print('Try again ')
-        return
+def create_channel():
+    channel_socket = socket.socket()
+    channel_socket.bind(('localhost', ))
+    channel_socket.listen()
+    Channel.append(channel_socket)

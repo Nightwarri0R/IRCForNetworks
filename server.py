@@ -151,7 +151,7 @@ while True:
             if message["data"].decode("utf-8").find("JOIN") != -1:
                 join()
 
-            # PART
+            # PART channel
             if message["data"].decode("utf-8").find("PART") != -1:
                 part()
 

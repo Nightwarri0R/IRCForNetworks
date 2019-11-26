@@ -138,8 +138,8 @@ while True:
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
 
-
-            # NICK
+            # NICK <nickname>
+            # Allows a client to change their IRC nickname.
             if message["data"].decode("utf-8").find("NICK") != -1:
                 nickname()
 
@@ -147,15 +147,19 @@ while True:
             if message["data"].decode("utf-8").find("USER") != -1:
                 user()
 
-            # JOIN function
+            # JOIN <channels>
+            # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
+            # then they will be created.
             if message["data"].decode("utf-8").find("JOIN") != -1:
                 join()
 
-            # PART channel
+            # PART <channels>
+            # Causes a user to leave the channels in the comma-separated list <channels>
             if message["data"].decode("utf-8").find("PART") != -1:
                 part()
 
-            # Private message function
+            # PRIVMSG <msgtarget> <message>
+            # Sends <message> to <msgtarget>, which is usually a user or channel.
             if message["data"].decode("utf-8").find("PRIVMSG") != -1:
                 privatemessage()
 
@@ -164,6 +168,7 @@ while True:
                 sys.exit()
 
             # DAY function
+            # Shows the date when !day is entered
             if message["data"].decode("utf-8").find("!day") != -1:
                 date = datetime.datetime.now()
                 print(date.strftime("%x"))
@@ -175,6 +180,7 @@ while True:
                 client_socket.send(message + message_header)
 
             # TIME function
+            # Shows the time when !time is entered
             if message["data"].decode("utf-8").find("!time") != -1:
                 time = datetime.datetime.now()
                 print(time.strftime("%X"))

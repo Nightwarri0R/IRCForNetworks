@@ -171,19 +171,19 @@ while True:
             # Shows the date when !day is entered
             if message["data"].decode("utf-8").find("!day") != -1:
                 date = datetime.datetime.now()
-                print(date.strftime("%x"))
+                print(date.strftime("%d/%m/%Y"))
                 # Wait for user to input a message
-                message = date.strftime("%x")
+                #message = date.strftime("%x")
                 # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
-                message = message.encode('utf-8')
-                message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-                client_socket.send(message + message_header)
+                #message = message.encode('utf-8')
+                #message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                #client_socket.send(message + message_header)
 
             # TIME function
             # Shows the time when !time is entered
             if message["data"].decode("utf-8").find("!time") != -1:
                 time = datetime.datetime.now()
-                print(time.strftime("%X"))
+                print(time.strftime("%H:%M"))
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:

@@ -211,25 +211,33 @@ while True:
             # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
             # then they will be created.
             if message["data"].decode("utf-8").find("JOIN") != -1:
-                join()
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #join(channels)
 
             # PART <channels>
             # Causes a user to leave the channels in the comma-separated list <channels>
-            if message["data"].decode("utf-8").find("PART") != -1:
-                part()
+            elif message["data"].decode("utf-8").find("PART") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #part(channels)
 
             # PRIVMSG <msgtarget> <message>
             # Sends <message> to <msgtarget>, which is usually a user or channel.
-            if message["data"].decode("utf-8").find("PRIVMSG") != -1:
-                privatemessage()
+            elif message["data"].decode("utf-8").find("PRIVMSG") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 2)
+                target = parse[1]
+                msg = parse[2]
+                # privatemsg(target, msg)
 
             # QUIT function
-            if message["data"].decode("utf-8").find("QUIT") != -1:
-                sys.exit()
+            elif message["data"].decode("utf-8").find("QUIT") != -1:
+                # sys.exit() HAS TO FINISH THE CLIENT FILE NOT SERVER
+                break
 
             # DAY function
             # Shows the date when !day is entered
-            if message["data"].decode("utf-8").find("!day") != -1:
+            elif message["data"].decode("utf-8").find("!day") != -1:
                 date = datetime.datetime.now()
                 print(date.strftime("%d/%m/%Y"))
                 # Wait for user to input a message
@@ -241,7 +249,7 @@ while True:
 
             # TIME function
             # Shows the time when !time is entered
-            if message["data"].decode("utf-8").find("!time") != -1:
+            elif message["data"].decode("utf-8").find("!time") != -1:
                 time = datetime.datetime.now()
                 print(time.strftime("%H:%M"))
 

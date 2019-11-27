@@ -7,6 +7,7 @@ import string
 import datetime
 
 
+
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
@@ -99,11 +100,6 @@ def create_channel():
 
 # print(f'Listening for connections on {IP}:{PORT}...')
 
-# join channel(s).
-channel = "##bot-testing"
-
-def joinchan():
-    print ("Hello what")
     #server_socket.send(bytes("JOIN " + channel + "n", "UTF-8"))
     #ircmsg = ""
     #while ircmsg.find("End of /NAMES list.") == -1:
@@ -111,8 +107,20 @@ def joinchan():
         #ircmsg = ircmsg.strip('nr')
         #print(ircmsg)
 
+
 def sendmsg(msg, target=channel):  # sends messages to the target.
     server_socket.send(bytes("PRIVMSG " + target + " :" + msg + "n", "UTF-8"))
+# Function to leave a channel
+#def part():
+
+ # Function to send a message either to a channel, a person or the bot
+# def privatemsg(target, msg):
+    # if there is a # in the target, send to that channel - if it's not there return a message
+    # if the target equals bot then message bot
+    # if there is such person message the person with that nickname
+    # else return that there is no such user doesn't exist
+    # server_socket.send(bytes("PRIVMSG " + target + " :" + msg + "n", "UTF-8"))
+
 
 # Handles message receiving
 def receive_message(client_socket):
@@ -221,6 +229,65 @@ while True:
                 parse = message["data"].decode("utf-8").split(" ", 1)
                 channels = parse[1]
                 #part(channels)
+
+            # PRIVMSG <msgtarget> <message>
+            # Sends <message> to <msgtarget>, which is usually a user or channel.
+            elif message["data"].decode("utf-8").find("PRIVMSG") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 2)
+                target = parse[1]
+                msg = parse[2]
+                # privatemsg(target, msg)
+
+            # QUIT function
+            elif message["data"].decode("utf-8").find("QUIT") != -1:
+                # sys.exit() HAS TO FINISH THE CLIENT FILE NOT SERVER
+                break
+
+            # DAY function
+            # Shows the date when !day is entered
+            elif message["data"].decode("utf-8").find("!day") != -1:
+                date = datetime.datetime.now()
+                print(date.strftime("%d/%m/%Y"))
+                # Wait for user to input a message
+                #message = date.strftime("%x")
+                # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
+                #message = message.encode('utf-8')
+                #message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                #client_socket.send(message + message_header)
+
+            # TIME function
+            # Shows the time when !time is entered
+            elif message["data"].decode("utf-8").find("!time") != -1:
+                time = datetime.datetime.now()
+                print(time.strftime("%H:%M"))
+
+            # NICK <nickname>
+            # Allows a client to change their IRC nickname.
+            if message["data"].decode("utf-8").find("NICK") != -1:
+                #nickname()
+                break
+
+            # USER
+            elif message["data"].decode("utf-8").find("USER") != -1:
+                #username()
+                break
+
+            # JOIN <channels>
+            # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
+            # then they will be created.
+            elif message["data"].decode("utf-8").find("JOIN") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #join(channels)
+                break
+
+            # PART <channels>
+            # Causes a user to leave the channels in the comma-separated list <channels>
+            elif message["data"].decode("utf-8").find("PART") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #part(channels)
+                break
 
             # PRIVMSG <msgtarget> <message>
             # Sends <message> to <msgtarget>, which is usually a user or channel.

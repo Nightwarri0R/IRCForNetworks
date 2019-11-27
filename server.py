@@ -153,6 +153,8 @@ while True:
             # NICK <nickname>
             # Allows a client to change their IRC nickname.
             if message["data"].decode("utf-8").find("NICK") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                nick = parse[1]
                 #nickname()
                 break
 
@@ -168,7 +170,6 @@ while True:
                 parse = message["data"].decode("utf-8").split(" ", 1)
                 channels = parse[1]
                 #join(channels)
-                break
 
             # PART <channels>
             # Causes a user to leave the channels in the comma-separated list <channels>
@@ -176,7 +177,6 @@ while True:
                 parse = message["data"].decode("utf-8").split(" ", 1)
                 channels = parse[1]
                 #part(channels)
-                break
 
             # PRIVMSG <msgtarget> <message>
             # Sends <message> to <msgtarget>, which is usually a user or channel.

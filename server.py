@@ -1,17 +1,22 @@
 import socket
 import select
+import threading 
+import sys
+import re
 import string
 import datetime
-import sys
+
 
 HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
 PORT = 1234
+Channel= {}
 # Code found in: https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
+
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # SO_ - socket option
@@ -19,18 +24,78 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Sets REUSEADDR (as a socket option) to 1 on socket
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+# Random seed to pick numbers which will be used later on to generate sockets
+
 # Bind, so server informs operating system that it's going to use given IP and port
 # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
 server_socket.bind((IP, PORT))
-
 # This makes server listen to new connections
-server_socket.listen()
+server_socket.listen(10)
 
 # List of sockets for select.select()
 sockets_list = [server_socket]
 
 # List of connected clients - socket as a key, user header and name as data
 clients = {}
+
+
+
+def creating_new_channel(client_socket):
+#String variable that stores the name of the channe 
+    getName = ''
+#Boolean variable 
+    sucess = False
+#Function that returns user input and then 
+    
+    if receive_message.message = re.findall('#channel', getName)
+        print(getName)
+
+        sucess = True 
+
+        if sucess == True:
+                
+            if getName not in Channel:
+            
+                new_channels  = threading.Thread(name = getName, target= create_channel)
+
+                new_channels.daemon = True 
+
+                new_channels.start()
+
+                print(threading.current_thread.__name__)
+
+                Channel['channel'] = new_channels
+
+            elif threading.current_thread().getName in Channel: 
+
+                    existing_channel = threading.Thread(name= getName, target = create_channel)
+
+                    existing_channel.daemon = True
+                
+                    existing_channel.start()
+                    print(threading.current_thread.__name__)
+            else: 
+                pass
+                
+        else: 
+            print('Try again ')
+            return
+
+def create_channel():
+
+    socket_number =+ 6551 
+
+
+    channel_socket = socket.socket()
+
+    channel_socket.bind(('localhost', socket_number))
+
+    channel_socket.listen(20)
+    
+    #Channel.append(channel_socket)
+
+    current_channel_users = {}
+
 
 # print(f'Listening for connections on {IP}:{PORT}...')
 
@@ -75,6 +140,7 @@ def receive_message(client_socket):
         # and that's also a cause when we receive an empty message
         return False
 
+
 while True:
 
     # Calls Unix select() system call or Windows select() WinSock call with three parameters:
@@ -100,6 +166,8 @@ while True:
             # The other returned object is ip/port set
             client_socket, client_address = server_socket.accept()
 
+            creating_new_channel(client_socket) 
+            #print(accept())
             # Client should send his name right away, receive it
             user = receive_message(client_socket)
 
@@ -137,6 +205,7 @@ while True:
             user = clients[notified_socket]
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            
 
             # JOIN <channels>
             # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
@@ -178,7 +247,6 @@ while True:
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:
-
                 # But don't sent it to sender
                 if client_socket != notified_socket:
 
@@ -194,3 +262,9 @@ while True:
 
         # Remove from our list of users
         del clients[notified_socket]
+
+
+#Different channels in progress running on different threads 
+
+
+

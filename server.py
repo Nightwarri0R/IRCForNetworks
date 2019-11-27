@@ -91,7 +91,7 @@ while True:
             # That gives us new socket - client socket, connected to this given client only, it's unique for that client
             # The other returned object is ip/port set
             client_socket, client_address = server_socket.accept()
-            print(accept())
+            #print(accept())
             # Client should send his name right away, receive it
             user = receive_message(client_socket)
 
@@ -150,23 +150,26 @@ while True:
         del clients[notified_socket]
 
 
-#Different channels in progres running on different threads
-
+#Different channels in progress running on different threads 
 
 
 
 def  CreatingNewCH():
+#String variable that stores the name of the channe 
     getName = ''
+#Boolean variable 
     sucess = False
-
+#Function that returns user input and then 
     receive_message.message = re.split('\\b#\\b',getName)[-1]
+
     print(receive_message)
+
     sucess = True 
 
     if sucess == True:
             
         if getName not in Channel:
-
+        
             new_channels  = threading.Thread(name = getName, target= create_channel and receive_message)
 
             new_channels.daemon = True 
@@ -175,20 +178,30 @@ def  CreatingNewCH():
 
             Channel.append(new_channels)
         
-            elif threading.current_thread().name in Channel: 
+        elif threading.current_thread().getName in Channel: 
 
-                ExistingChannel = threading.Thread(name= getName, target= irc and receive_message)
+                existing_channel = threading.Thread(name= getName, target = create_channel and receive_message)
+
+                existing_channel.daemon = True
             
-                ExistingChannel.start()
-            else: 
-                pass
-            
+                existing_channel.start()
         else: 
-            print('Try again ')
-            return
+            pass
+            
+    else: 
+        print('Try again ')
+        return
 
 def create_channel():
+
+    socket_number =+ 6551 
+
+
     channel_socket = socket.socket()
-    channel_socket.bind(('localhost', ))
-    channel_socket.listen()
+
+    channel_socket.bind(('localhost', socket_number))
+
+    channel_socket.listen(client_socket)
+    
     Channel.append(channel_socket)
+    

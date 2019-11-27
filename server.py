@@ -3,6 +3,8 @@ import select
 import threading 
 import sys
 import re
+import string
+import datetime
 
 
 HEADER_LENGTH = 10
@@ -97,6 +99,21 @@ def create_channel():
 
 # print(f'Listening for connections on {IP}:{PORT}...')
 
+# join channel(s).
+channel = "##bot-testing"
+
+def joinchan():
+    print ("Hello what")
+    #server_socket.send(bytes("JOIN " + channel + "n", "UTF-8"))
+    #ircmsg = ""
+    #while ircmsg.find("End of /NAMES list.") == -1:
+        #ircmsg = server_socket.recv(2048).decode("UTF-8")
+        #ircmsg = ircmsg.strip('nr')
+        #print(ircmsg)
+
+def sendmsg(msg, target=channel):  # sends messages to the target.
+    server_socket.send(bytes("PRIVMSG " + target + " :" + msg + "n", "UTF-8"))
+
 # Handles message receiving
 def receive_message(client_socket):
 
@@ -189,6 +206,44 @@ while True:
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
             
+
+            # JOIN <channels>
+            # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
+            # then they will be created.
+            if message["data"].decode("utf-8").find("JOIN") != -1:
+                join()
+
+            # PART <channels>
+            # Causes a user to leave the channels in the comma-separated list <channels>
+            if message["data"].decode("utf-8").find("PART") != -1:
+                part()
+
+            # PRIVMSG <msgtarget> <message>
+            # Sends <message> to <msgtarget>, which is usually a user or channel.
+            if message["data"].decode("utf-8").find("PRIVMSG") != -1:
+                privatemessage()
+
+            # QUIT function
+            if message["data"].decode("utf-8").find("QUIT") != -1:
+                sys.exit()
+
+            # DAY function
+            # Shows the date when !day is entered
+            if message["data"].decode("utf-8").find("!day") != -1:
+                date = datetime.datetime.now()
+                print(date.strftime("%d/%m/%Y"))
+                # Wait for user to input a message
+                #message = date.strftime("%x")
+                # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
+                #message = message.encode('utf-8')
+                #message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                #client_socket.send(message + message_header)
+
+            # TIME function
+            # Shows the time when !time is entered
+            if message["data"].decode("utf-8").find("!time") != -1:
+                time = datetime.datetime.now()
+                print(time.strftime("%H:%M"))
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:

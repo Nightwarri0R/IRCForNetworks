@@ -138,15 +138,6 @@ while True:
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
 
-            # NICK <nickname>
-            # Allows a client to change their IRC nickname.
-            if message["data"].decode("utf-8").find("NICK") != -1:
-                nickname()
-
-            # USER
-            if message["data"].decode("utf-8").find("USER") != -1:
-                user()
-
             # JOIN <channels>
             # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
             # then they will be created.

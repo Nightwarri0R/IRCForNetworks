@@ -28,7 +28,7 @@ server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
 server_socket.bind((IP, PORT))
 # This makes server listen to new connections
-server_socket.listen()
+server_socket.listen(10)
 
 # List of sockets for select.select()
 sockets_list = [server_socket]
@@ -37,6 +37,62 @@ sockets_list = [server_socket]
 clients = {}
 
 
+
+def creating_new_channel(client_socket):
+#String variable that stores the name of the channe 
+    getName = ''
+#Boolean variable 
+    sucess = False
+#Function that returns user input and then 
+    
+    if receive_message.message = re.findall('#channel', getName)
+        print(getName)
+
+        sucess = True 
+
+        if sucess == True:
+                
+            if getName not in Channel:
+            
+                new_channels  = threading.Thread(name = getName, target= create_channel)
+
+                new_channels.daemon = True 
+
+                new_channels.start()
+
+                print(threading.current_thread.__name__)
+
+                Channel['channel'] = new_channels
+
+            elif threading.current_thread().getName in Channel: 
+
+                    existing_channel = threading.Thread(name= getName, target = create_channel)
+
+                    existing_channel.daemon = True
+                
+                    existing_channel.start()
+                    print(threading.current_thread.__name__)
+            else: 
+                pass
+                
+        else: 
+            print('Try again ')
+            return
+
+def create_channel():
+
+    socket_number =+ 6551 
+
+
+    channel_socket = socket.socket()
+
+    channel_socket.bind(('localhost', socket_number))
+
+    channel_socket.listen(20)
+    
+    #Channel.append(channel_socket)
+
+    current_channel_users = {}
 
 
 # print(f'Listening for connections on {IP}:{PORT}...')
@@ -67,6 +123,7 @@ def receive_message(client_socket):
         # and that's also a cause when we receive an empty message
         return False
 
+
 while True:
 
     # Calls Unix select() system call or Windows select() WinSock call with three parameters:
@@ -91,6 +148,8 @@ while True:
             # That gives us new socket - client socket, connected to this given client only, it's unique for that client
             # The other returned object is ip/port set
             client_socket, client_address = server_socket.accept()
+
+            creating_new_channel(client_socket) 
             #print(accept())
             # Client should send his name right away, receive it
             user = receive_message(client_socket)
@@ -154,54 +213,3 @@ while True:
 
 
 
-def  CreatingNewCH():
-#String variable that stores the name of the channe 
-    getName = ''
-#Boolean variable 
-    sucess = False
-#Function that returns user input and then 
-    receive_message.message = re.split('\\b#\\b',getName)[-1]
-
-    print(receive_message)
-
-    sucess = True 
-
-    if sucess == True:
-            
-        if getName not in Channel:
-        
-            new_channels  = threading.Thread(name = getName, target= create_channel and receive_message)
-
-            new_channels.daemon = True 
-
-            new_channels.start()
-
-            Channel.append(new_channels)
-        
-        elif threading.current_thread().getName in Channel: 
-
-                existing_channel = threading.Thread(name= getName, target = create_channel and receive_message)
-
-                existing_channel.daemon = True
-            
-                existing_channel.start()
-        else: 
-            pass
-            
-    else: 
-        print('Try again ')
-        return
-
-def create_channel():
-
-    socket_number =+ 6551 
-
-
-    channel_socket = socket.socket()
-
-    channel_socket.bind(('localhost', socket_number))
-
-    channel_socket.listen(client_socket)
-    
-    Channel.append(channel_socket)
-    

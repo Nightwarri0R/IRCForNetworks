@@ -7,7 +7,8 @@ HEADER_LENGTH = 10
 
 IP = "127.0.0.1"
 PORT = 1234
-my_username = input("Username: ")
+my_username = input("NICK NAME ")
+my_real_name = input("REAL NAME ")
 
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
@@ -31,10 +32,30 @@ while True:
     # Wait for user to input a message
     message = input(f'{my_username} > ')
 
+    # Wait for user to input a message
+    # message2 = input(f'{my_real_name} > ')
+
     # If message is not empty - send it
     if message:
 
         # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
+
+        # NICK <nickname>
+        # Allows a client to change their IRC nickname.
+        if message.find("NICK") != -1:
+            parseNick = message.split(" ", 1)
+            my_username = parseNick[1]
+            username = my_username.encode('utf-8')
+            username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
+            client_socket.send(username_header + username)
+            print("Your current NICK NAME is: " + my_username)
+
+        # USER
+        elif message.find("USER") != -1:
+            parseUserName = message.split(" ", 1)
+            my_real_name = parseUserName[1]
+            print("Your current USER NAME is: " + my_real_name)
+
         message = message.encode('utf-8')
         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
         client_socket.send(message_header + message)

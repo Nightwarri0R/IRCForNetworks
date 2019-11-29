@@ -107,27 +107,26 @@ class Server:
                     # Also save username and username header
                     clients[client_socket] = user
 
-# join channel(s).
-channel = "##bot-testing"
+        # join channel(s).
+        channel = "##bot-testing"
 
-def joinchan():
-    print ("Hello what")
-    #server_socket.send(bytes("JOIN " + channel + "n", "UTF-8"))
-    #ircmsg = ""
-    #while ircmsg.find("End of /NAMES list.") == -1:
-        #ircmsg = server_socket.recv(2048).decode("UTF-8")
-        #ircmsg = ircmsg.strip('nr')
-        #print(ircmsg)
+        def joinchan():
+            print ("Hello what")
+            #server_socket.send(bytes("JOIN " + channel + "n", "UTF-8"))
+            #ircmsg = ""
+            #while ircmsg.find("End of /NAMES list.") == -1:
+                #ircmsg = server_socket.recv(2048).decode("UTF-8")
+                #ircmsg = ircmsg.strip('nr')
+                #print(ircmsg)
 
-def sendmsg(msg, target=channel):  # sends messages to the target.
-    server_socket.send(bytes("PRIVMSG " + target + " :" + msg + "n", "UTF-8"))
+        def sendmsg(msg, target=channel):  # sends messages to the target.
+            server_socket.send(bytes("PRIVMSG " + target + " :" + msg + "n", "UTF-8"))
 
-# Handles message receiving
-def receive_message(client_socket):
+        # Handles message receiving
+        def receive_message(client_socket):
                     print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
 
                 # Else existing socket is sending a message
-                else:
 
                     # Receive message
                     message = receive_message(notified_socket)
@@ -159,15 +158,15 @@ def receive_message(client_socket):
                             # We are reusing here message header sent by sender, and saved username header send by user when he connected
                             client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
-            # It's not really necessary to have this, but will handle some socket exceptions just in case
-            for notified_socket in exception_sockets:
+                    # It's not really necessary to have this, but will handle some socket exceptions just in case
+                        for notified_socket in exception_sockets:
 
-                # Remove from list for socket.socket()
-                sockets_list.remove(notified_socket)
+                            # Remove from list for socket.socket()
+                            sockets_list.remove(notified_socket)
 
-                # Remove from our list of users
-                del clients[notified_socket]
-                # class for #
+                            # Remove from our list of users
+                            del clients[notified_socket]
+                            # class for #
         def run(self):
             Server.receive_message(self)
 

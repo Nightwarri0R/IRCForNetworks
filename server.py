@@ -214,9 +214,6 @@ while True:
 
             print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
             
-
-
-
             # JOIN <channels>
             # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
             # then they will be created.
@@ -257,23 +254,6 @@ while True:
                     clients[client_socket] = user
                     print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
 
-            # DAY function
-            # Shows the date when !day is entered
-            elif message["data"].decode("utf-8").find("!day") != -1:
-                date = datetime.datetime.now()
-                print(date.strftime("%d/%m/%Y"))
-                # Wait for user to input a message
-                #message = date.strftime("%x")
-                # Encode message to bytes, prepare header and convert to bytes, like for username above, then send
-                #message = message.encode('utf-8')
-                #message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-                #client_socket.send(message + message_header)
-
-            # TIME function
-            # Shows the time when !time is entered
-            elif message["data"].decode("utf-8").find("!time") != -1:
-                time = datetime.datetime.now()
-                print(time.strftime("%H:%M"))
 
             # Iterate over connected clients and broadcast message
             for client_socket in clients:

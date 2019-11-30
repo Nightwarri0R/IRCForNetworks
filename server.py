@@ -10,35 +10,38 @@ import datetime
 
 HEADER_LENGTH = 10
 
-IP = "127.0.0.1"
-PORT = 6667
 Channel= {}
 # Code found in: https://pythonprogramming.net/server-chatroom-sockets-tutorial-python-3/
 # Create a socket
 # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
 # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
 class server_connection():
+    IP = "127.0.0.1"
+    PORT = 6667
     def connection_to_server(self,IP , PORT):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # SO_ - socket option   
         # SOL_ - socket option level
         # Sets REUSEADDR (as a socket option) to 1 on socket
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         # Random seed to pick numbers which will be used later on to generate sockets
 
         # Bind, so server informs operating system that it's going to use given IP and port
         # For a server using 0.0.0.0 means to listen on all available interfaces, useful to connect locally to 127.0.0.1 and remotely to LAN interface IP
-        server_socket.bind((IP, PORT))
+        self.server_socket.bind((IP, PORT))
         # This makes server listen to new connections
-        server_socket.listen(10)
+        self.server_socket.listen(10)
 
         # List of sockets for select.select()
-        sockets_list = [server_socket]
+        self.sockets_list = [server_socket]
 
         # List of connected clients - socket as a key, user header and name as data
-        clients = {}
+        self.clients = {}
+
+    def run(connection_to_server):
+        return select.select.__sizeof__(self.clients)
 
 
 # print(f'Listening for connections on {IP}:{PORT}...')
@@ -66,28 +69,17 @@ class server_connection():
 
 
 # Handles message receiving
-class current_channels():
-    def receive_message(client_socket):
+class current_channels(object):
+    current_channel_users = {}
+    def __init__(self, name , ):
+        self.channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        self.channel_socket = socket.socket(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        self.channel_socket.bind(('localhost', socket))
 
-        socket_number =+ 6551 
-
-
-        channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        channel_socket = socket.socket(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        channel_socket.bind(('localhost', socket_number))
-
-        channel_socket.listen(20)
+        self.channel_socket.listen(20)
         
-        
-
-        current_channel_users = {}
-
-
-
         try:
 
             # Receive our "header" containing message length, it's size is defined and constant
@@ -255,6 +247,14 @@ class current_channels():
 
             # Remove from our list of users
             del clients[notified_socket]
+
+
+while True:
+    server_connection_attempt = server_connection() 
+    Ithread = threading.Thread(name='default' target = server_connection_attempt.run)
+
+    Channel={server_connection_attempt:'1'}
+    Ithread.start()
 
 
 

@@ -16,7 +16,7 @@ Channel= {}
 class server_connection():
     IP = "127.0.0.1"
     PORT = 6667
-    def connection_to_server(self,IP , PORT):
+    def connection_to_server(self, IP, PORT):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # SO_ - socket option   
@@ -36,7 +36,7 @@ class server_connection():
         self.sockets_list = [server_socket]
 
         # List of connected clients - socket as a key, user header and name as data
-        self.clients = {}
+        clients = {}
 
     def run(connection_to_server):
         for x in clients:
@@ -45,23 +45,23 @@ class server_connection():
 
 
 # Handles message receiving
-class current_channels(object):
-    current_channel_users = ()
+class current_channels(Object):
+    current_channel_users = {}
 
     def __init__(self, name, server_connection):
+
         self.channel_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.channel_socket = socket.socket(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        self.channel_socket.bind(('localhost',server_connection.self.socket_list)
+        self.channel_socket.bind(('localhost',server_connection.self.socket_list))
 
         self.channel_socket.listen(15)
 
-    # Method for adding users to the object of channel
-    def add_users(server_connection.clients):
-        current_channel_users.append(server_connection.self.clients)
+    # Method for adding users to the object of channell 
+    def add_users(NICK ,current_users = server_connection()):
+        current_channel_users = ['NICK', current_users.self.clients]
     
-
         try:
 
             # Receive our "header" containing message length, it's size is defined and constant
@@ -161,7 +161,7 @@ class mesage_commands():
             parse = message["data"].decode("utf-8").split(" ", 1)
             channels = parse[1]
             #join(channels)
-            break
+            #break
 
         # PART <channels>
         # Causes a user to leave the channels in the comma-separated list <channels>

@@ -61,29 +61,6 @@ class current_channels(Object):
     # Method for adding users to the object of channell 
     def add_users(NICK ,current_users = server_connection()):
         current_channel_users = ['NICK', current_users.self.clients]
-    
-        try:
-
-            # Receive our "header" containing message length, it's size is defined and constant
-            message_header = client_socket.recv(HEADER_LENGTH)
-
-            # If we received no data, client gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-            if not len(message_header):
-                return False
-
-            # Convert header to int value
-            message_length = int(message_header.decode('utf-8').strip())
-
-            # Return an object of message header and message data
-            return {'header': message_header, 'data': client_socket.recv(message_length)}
-
-        except:
-
-            # If we are here, client closed connection violently, for example by pressing ctrl+c on his script
-            # or just lost his connection
-            # socket.close() also invokes socket.shutdown(socket.SHUT_RDWR) what sends information about closing the socket (shutdown read/write)
-            # and that's also a cause when we receive an empty message
-            return False
 
 
         while True:
@@ -153,7 +130,7 @@ class current_channels(Object):
                 
 
 
-class mesage_commands():
+class message_commands():
         # JOIN <channels>
         # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
         # then they will be created.
@@ -169,7 +146,7 @@ class mesage_commands():
             parse = message["data"].decode("utf-8").split(" ", 1)
             channels = parse[1]
             #part(channels)
-            break
+            #break
 
         # PRIVMSG <msgtarget> <message>
         # Sends <message> to <msgtarget>, which is usually a user or channel.

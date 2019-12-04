@@ -254,9 +254,7 @@ class Client(object):
                     self.message_channel(
                         channel, "PART", "%s :%s" % (channelname, partmsg),
                         True)
-                    self.channel_log(channel, "left (%s)" % partmsg, meta=True)
                     del self.channels[channelname]
-                    server.remove_member_from_channel(self, channelname)
 
         def ping_handler():
             if len(arguments) < 1:

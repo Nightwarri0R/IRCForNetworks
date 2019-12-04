@@ -24,8 +24,9 @@ class Client(object):
         self.write_buffer = ""
         self.nickname = ""
         self.realname = ""
-        self.username = ""
+        self.user = ""
         self.handle_command = self.registration_handler
+        self.registered = False
     
     def write_queue_size(self):
         return len(self.write_buffer)
@@ -34,7 +35,7 @@ class Client(object):
         self.write_buffer += msg + "\r\n"
 
     def reply(self, msg):
-        self.message(":%s %s" % (self.server.name, msg))
+        self.message(":%s %s" % (self.server.hostname, msg))
 
     def reply_403(self, channel):
         self.reply("403 %s %s :No such channel" % (self.nickname, channel))
@@ -48,6 +49,7 @@ class Client(object):
         self.rec_buffer = lines[-1]
         lines = lines[:-1]
         for line in lines:
+            print(line)
             if not line:
                 # Empty line. Ignore.
                 continue
@@ -63,17 +65,22 @@ class Client(object):
                     arguments = y[0].split()
                     if len(y) == 2:
                         arguments.append(y[1])
-            self.handle_command(command, arguments)
+            if(self.registered):
+                self.command_handler(command, arguments)
+            else:
+                self.registration_handler(command, arguments)
 
     def socket_readable(self):
         data = ""
         data = self.socket.recv(1024)
         self.rec_buffer += data.decode()
-        #self.parse_read_buffer()
+        self.parse_read_buffer()
 
     def socket_write(self):
+
         amountBuffer = self.socket.send(self.write_buffer.encode())
         self.write_buffer = self.write_buffer[amountBuffer:]
+
     def registration_handler(self, command, arguments):
         server = self.server
         if command == "NICK":
@@ -86,18 +93,24 @@ class Client(object):
             else:
                 self.nickname = nick
                 server.client_changed_nickname(self, None)
+                print("nickname set")
         elif command == "USER":
             if len(arguments) < 4:
                 self.reply_461("USER")
                 return
             self.user = arguments[0]
             self.realname = arguments[3]
+            print("user set")
         elif command == "QUIT":
             self.disconnect("Client quit")
             return
+        if(self.nickname!="" and self.user != ""):
+            self.registered = True
+            # send messages here 001, 002
+
     def message_channel(self, channel, command, message, include_self=False):
-        line = ": %s %s" % (command, message)
-        for client in channel.members:
+        line = ":%s!%s@%s %s %s" % (self.nickname, self.user, self.hostname, command, message)
+        for client in channel.members.values():
             if client != self or include_self:
                 client.message(line)
 
@@ -109,18 +122,11 @@ class Client(object):
         self.socket.close()
         self.server.remove_client(self, quitmsg)
 
-    def channel_log(self, channel, message, meta=False):
-        if not self.server.channel_log_dir:
-            return
-        if meta:
-            format = "[%s] * %s %s\n"
-        else:
-            format = "[%s] <%s> %s\n"
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-        logname = channel.name.replace("_", "__").replace("/", "_")
-        fp = open("%s/%s.log" % (self.server.channel_log_dir, logname), "a")
-        fp.write(format % (timestamp, self.nickname, message))
-        fp.close()
+    def message(self, msg):
+        print(msg)
+        self.write_buffer += msg + "\r\n"
+
+
 
     def send_names(self, arguments, for_join=False):
         server = self.server
@@ -141,17 +147,12 @@ class Client(object):
                 self.reply_403(channelname)
                 continue
             channel = server.get_channel(channelname)
-            if channel.key is not None and channel.key != keys[i]:
-                self.reply(
-                    "475 %s %s :Cannot join channel (+k) - bad key"
-                    % (self.nickname, channelname))
-                continue
 
             if for_join:
-                channel.add_member(self)
+                channel.members[self.nickname] = self
                 self.channels[channelname] = channel
                 self.message_channel(channel, "JOIN", channelname, True)
-                self.channel_log(channel, "joined", meta=True)
+
                 if channel.topic:
                     self.reply("332 %s %s :%s"
                                % (self.nickname, channel.name, channel.topic))
@@ -162,8 +163,8 @@ class Client(object):
             names = ""
             # Max length: reply prefix ":server_name(space)" plus CRLF in
             # the end.
-            names_max_len = 512 - (len(server.name) + 2 + 2)
-            for name in sorted(x.nickname for x in channel.members):
+            names_max_len = 512 - (len(server.hostname) + 2 + 2)
+            for name in sorted(x.nickname for x in channel.members.values()):
                 if not names:
                     names = names_prefix + name
                 # Using >= to include the space between "names" and "name".
@@ -178,7 +179,8 @@ class Client(object):
                        % (self.nickname, channelname))
 # START OF command_handler
     def command_handler(self, command, arguments):
-      
+        print(command)
+        print(arguments)
         def join_handler():
             if len(arguments) < 1:
                 self.reply_461("JOIN")
@@ -225,11 +227,10 @@ class Client(object):
             if client:
                 client.message(": %s %s :%s"
                                % (command, targetname, message))
-            elif server.has_channel(targetname):
+            elif targetname in self.channels:
                 channel = server.get_channel(targetname)
                 self.message_channel(
                     channel, command, "%s :%s" % (channel.name, message))
-                self.channel_log(channel, message)
             else:
                 self.reply("401 %s %s :No such nick/channel"
                            % (self.nickname, targetname))
@@ -319,8 +320,7 @@ class Server(object):
             ready_to_read, ready_to_write, errorIn = select.select(list_sockets, list_sockets, list_sockets)
             for client in ready_to_read:
                 if client in self.client_sockets:
-                    #client.socket_readable()
-                    clients = {}
+                    self.client_sockets[client].socket_readable()
                 else:
                     connection, address = client.accept()
                     list_sockets.append(connection)
@@ -337,6 +337,22 @@ class Server(object):
             for client in ready_to_write:
                 if client in self.client_sockets:  # client may have been disconnected
                     self.client_sockets[client].socket_write()
+
+    def get_client(self, nickname):
+        return self.nickname_list.get(nickname)
+
+    def get_channel(self, channelname):
+        if channelname in self.channel_list:
+            channel = self.channel_list[channelname]
+        else:
+            channel = Channel(channelname)
+            self.channel_list[channelname] = channel
+        return channel
+
+    def client_changed_nickname(self, client, oldnickname):
+        if oldnickname:
+            del self.nickname_list[oldnickname]
+        self.nickname_list[client.nickname] = client
 
 class Channel(object):
      def __init__(self, name):

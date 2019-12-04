@@ -225,8 +225,8 @@ class Client(object):
             message = arguments[1]
             client = server.get_client(targetname)
             if client:
-                client.message(": %s %s :%s"
-                               % (command, targetname, message))
+                client.message(":%s!%s@%s %s %s :%s"
+                               % (self.nickname, self.user, self.hostname, command, targetname, message))
             elif targetname in self.channels:
                 channel = server.get_channel(targetname)
                 self.message_channel(

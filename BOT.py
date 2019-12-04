@@ -86,8 +86,22 @@ while 1:
             # if the user sends anything else to the bot that is not !day or !time, the user will receive a #
             # personalised private message
             else:
-                botSocket.send(bytes("PRIVMSG %s :Hello I am ProBot, how can I help you?" % (sender) + "\r\n", "UTF-8"))
-
-        # code used for debugging
-      # for index, i in enumerate(line):
-      #     print(line[index])
+                import random
+                # random number used to choose which random fact it will be displayed
+                number = random.randint(1, 6)
+                # function that displays a random fact depending on a number i, it works using a switcher
+                def fact(i):
+                    # switcher used to choose the random fact
+                    switcher = {
+                        1: 'Did you know that most toilets flush in E flat?',
+                        2: 'Did you know that sloths can held breath longer than dolphins can?',
+                        3: 'Did you know that Scotland has 421 words for "snow"?',
+                        4: 'Did you know octopuses have three hearts?',
+                        5: 'Did you know that Empire State Building has its own post code?',
+                        6: 'Did you know that the Eiffel Tower was originally intended for Barcelona?'
+                    }
+                    return switcher.get(i, "Not valid number")
+                # Random fact that will be displayed to the user
+                fact = fact(number)
+                # Displaying the random fact to the user
+                botSocket.send(bytes("PRIVMSG %s :%s" % (sender, fact) + "\r\n", "UTF-8"))

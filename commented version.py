@@ -295,6 +295,7 @@ class Client(object):
             else:
                 self.reply("401 %s %s :No such nick/channel"
                            % (self.nickname, targetname))
+
         '''This function is called when the user wants to leave a channel and the it works is user has to enter part word in the chat.Checks if user has joined
         a channel and if not then informs them that they are not in any channel yet'''
         def part_handler():
@@ -353,7 +354,7 @@ class Client(object):
             self.reply("421 %s %s :Unknown command" % (self.nickname, command))
 # END OF command_handler
 
-''' Server class used for accepting new user and checking '''
+'''Users are connected to the Server class, before actualy starting to create/use channels and use commands'''
 class Server(object):
 
     def __init__(self):
@@ -363,11 +364,7 @@ class Server(object):
         self.rec_buffer = ""
         self.client_sockets = {}
         self.nickname_list = {}
-        self.hostname = socket.getfqdn(socket.gethostname())
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.regex = re.compile(r"\r?\n")
-
-    def run(self):
+        self.hostname = socket.getfqdn(socket.gethostname''
         # Setting up server's socket and listening for new connections
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.ip, self.port))
@@ -375,7 +372,9 @@ class Server(object):
         list_sockets = []
         list_sockets.append(self.socket)
         self.connect_socket(list_sockets)
-
+    '''Takes two parameters self and list_sockets. The current function is handles for accepting new user connection, by checking user sockets and addres. If client
+    already exists in client_socket dictionary flips the state of the socket to readadble. If its a new client then takes the user socket and appends it to list_sockets
+    and print out the message and where is the new connection from'''
     def connect_socket(self, list_sockets):
         while True:
             ready_to_read, ready_to_write, errorIn = select.select(list_sockets, list_sockets, list_sockets)
@@ -388,8 +387,6 @@ class Server(object):
                     try:
                         self.client_sockets[connection] = Client(self, connection)
                         print("Accepted connection from %s:%s." % (address[0], address[1]))
-                        #self.reply("Accepted connection from %s:%s." % (address[0], address[1]))
-                        #self.client_sockets[connection].socket_readable()
                     except socket.error:
                         try:
                             connection.close()
@@ -398,10 +395,10 @@ class Server(object):
             for client in ready_to_write:
                 if client in self.client_sockets:  # client may have been disconnected
                     self.client_sockets[client].socket_write()
-
+    '''Returns the client nickname'''
     def get_client(self, nickname):
         return self.nickname_list.get(nickname)
-
+    '''Returns the channel name''' 
     def get_channel(self, channelname):
         if channelname in self.channel_list:
             channel = self.channel_list[channelname]
@@ -409,18 +406,18 @@ class Server(object):
             channel = Channel(channelname)
             self.channel_list[channelname] = channel
         return channel
-
+    '''Function that calls change nickname handler'''
     def client_changed_nickname(self, client, oldnickname):
         if oldnickname:
             del self.nickname_list[oldnickname]
         self.nickname_list[client.nickname] = client
-
+'''Basic Channel object that contains only a constructor'''
 class Channel(object):
      def __init__(self, name):
         self.name = name
         self.members = {}
         self.topic = ""
-
+'''Main function of this python program '''
 def main():
 
     myServer = Server()

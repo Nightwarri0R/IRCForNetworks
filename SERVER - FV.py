@@ -7,6 +7,7 @@ import errno
 import sys
 import time
 import argparse
+
 # python .\miniircd --debug 
 # dictionary[new_key] = new_thing_in_dictionary
 class Client(object):
@@ -27,8 +28,6 @@ class Client(object):
         self.user = ""
         self.handle_command = self.registration_handler
         self.registered = False
-    
- 
     
     def parse_read_buffer(self):
         lines = self.linesep_regexp.split(self.rec_buffer)
@@ -312,7 +311,7 @@ class Client(object):
             self.reply("421 %s %s :Unknown command" % (self.nickname, command))
 # END OF command_handler
 
-
+# Server class
 class Server(object):
 
     def __init__(self):
@@ -325,9 +324,9 @@ class Server(object):
         self.hostname = socket.getfqdn(socket.gethostname())
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.regex = re.compile(r"\r?\n")
-
+        
+    # Setting up server's socket and listening for new connections
     def run(self):
-        # Setting up server's socket and listening for new connections
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.ip, self.port))
         self.socket.listen()
@@ -373,17 +372,18 @@ class Server(object):
         if oldnickname:
             del self.nickname_list[oldnickname]
         self.nickname_list[client.nickname] = client
-
+        
+# Channel class which includes channel initiations to create new channels
 class Channel(object):
      def __init__(self, name):
         self.name = name
         self.members = {}
         self.topic = ""
-
+        
+# Main method for running the server
 def main():
-
     myServer = Server()
     myServer.run()
 
-if __name__== "__main__": # lookup how to run main in python
+if __name__== "__main__":
     main()

@@ -62,7 +62,10 @@ class Client(object):
             else:
                 self.registration_handler(command, arguments)
 
-    # Takes self parameter, reads the socket from the user and gets the information. That information is then sent to parse function
+    """
+    Takes self parameter, reads the socket from the user and gets the information.
+    That information is then sent to parse function.
+    """
     def socket_readable(self):
         data = ""
         data = self.socket.recv(1024)
@@ -78,8 +81,8 @@ class Client(object):
         self.write_buffer = self.write_buffer[amountBuffer:]
 
     """
-    After all the parsing has been performed the registration_handler checks if it does contain any of the given user commands. 
-    If it does it calls the respective function.
+    After all the parsing has been performed the registration_handler checks if it does contain any of the given
+    user commands. If it does it calls the respective function.
     """
     def registration_handler(self, command, arguments):
         server = self.server
@@ -139,43 +142,33 @@ class Client(object):
         print(msg)
         self.write_buffer += msg + "\r\n"
 
-    """
-    Automatically runs function when user connects and instantly greets the user with "Welcome" and their info.
-    """
+
+    # Automatically runs function when user connects and instantly greets the user with "Welcome" and their info.
     def reply_001(self):
         self.reply(": %s 001 %s : Welcome" % (self.hostname, self.nickname))
 
-    """
-    Automatically runs function when user connects and displays the running version of the server.
-    """"
+
+    # Automatically runs function when user connects and displays the running version of the server.
     def reply_002(self):
         self.reply(": %s 002 %s : Your host is %s, running version 3.0" % (self.hostname, self.nickname, self.hostname))
 
-    """
-    Automatically runs function when user connects, then prints whenever the server is created.
-    """
+    # Automatically runs function when user connects, then prints whenever the server is created.
     def reply_003(self):
         self.reply(": %s 003 %s : The server was created sometime" % (self.hostname, self.nickname))
 
-    """
-    Automatically runs function when user connects, then prints the version of the server.
-    In our case this is just generic statement.
-    """
+    # Automatically runs function when user connects, then prints the version of the server.
+    # In our case this is just generic statement.
     def reply_004(self):
         self.reply(": %s 004 %s : %s version 0" % (self.hostname, self.nickname, self.hostname))
 
-    """
-    Automatically runs function when user connects, then displays the current users on the server.
-    """
+    # Automatically runs function when user connects, then displays the current users on the server.
     def reply_251(self):
         users=0
         for user in self.server.client_sockets:
             users = users + 1
         self.reply(": %s 251 %s : there are %s users" % (self.hostname, self.nickname, users))
 
-    """
-    Automatically runs function when user connects, then prints the message of the day (MOTD).
-    """
+    # Automatically runs function when user connects, then prints the message of the day (MOTD).
     def reply_422(self):
         self.reply(": %s 422 %s : no MOTD" % (self.hostname, self.nickname)) 
     

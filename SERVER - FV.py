@@ -173,11 +173,10 @@ class Client(object):
         self.reply(": %s 422 %s : no MOTD" % (self.hostname, self.nickname)) 
     
     """
-    Method that is used to validate channel names based on user input. First it takes three paramters (self, arguments, for_join), after 
-    that server is class is self referenced after that list length is cheked. If it is less than 0, pass channelNames at possition 0 to the list, and put a comma after it
+    Method that is used to validate channel names based on user input. 
+    Taking paramters (self, arguments, for_join), after that server is class is self referenced after that list length is cheked. If it is less than 0, pass channelNames at possition 0 to the list, and put a comma after it
     . Where there is comma and if the list size is greater then 1 pass keys list arguments at possiton 1 and write a comma after it    
     Once that is done it starts to itterate throught the channel list to check th given channel name.
-    def send_names(self, arguments, for_join=False):
     """
     def send_names(self, arguments, for_join=False):
         server = self.server
@@ -252,8 +251,8 @@ class Client(object):
         self.reply("461 %s %s :Not enough parameters" % (nickname, command))
     
 """
-Method in our server that does the checking for commands that are used in it and every one of those commands are defined in this function.
-All of those commands are stored in a dictionary called handler_table
+Method that checks for the commands in messages and handles them.
+All of valid commands are stored in a dictionary called handler_table.
 """
 # START OF command_handler
     def command_handler(self, command, arguments):

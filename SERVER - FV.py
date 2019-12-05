@@ -174,9 +174,8 @@ class Client(object):
     
     """
     Method that is used to validate channel names based on user input. 
-    Taking paramters (self, arguments, for_join), after that server is class is self referenced after that list length is cheked. If it is less than 0, pass channelNames at possition 0 to the list, and put a comma after it
-    . Where there is comma and if the list size is greater then 1 pass keys list arguments at possiton 1 and write a comma after it    
-    Once that is done it starts to itterate throught the channel list to check th given channel name.
+    Taking paramters (self, arguments, for_join), user input and based on that checks if the channel exists.
+    If the channel name if already on the list it just joins that channel, otherwise it creates a new channel.
     """
     def send_names(self, arguments, for_join=False):
         server = self.server
@@ -386,8 +385,11 @@ All of valid commands are stored in a dictionary called handler_table.
             self.reply("421 %s %s :Unknown command" % (self.nickname, command))
 # END OF command_handler
 
-# Server class which includes server constructor and initialises the attributes of this class
+"""
+Users are connected to the Server class, before starting to create/use channels and use commands.
+"""
 class Server(object):
+    # Server constructor to initialises the attributes of this class
     def __init__(self):
         self.ip = "127.0.0.1"
         self.port = 6667
@@ -408,6 +410,13 @@ class Server(object):
         list_sockets.append(self.socket)
         self.connect_socket(list_sockets)
 
+    """
+    Takes two parameters (self and list_sockets). The current function handles accepting new user connection,
+    by checking user sockets and addresses.
+    If client already exists in client_socket dictionary changes the socket to readable. 
+    If it's a new client then takes the user socket, appends it to list_sockets and prints out 
+    the message and where is the new connection from.
+    """
     def connect_socket(self, list_sockets):
         while True:
             ready_to_read, ready_to_write, errorIn = select.select(list_sockets, list_sockets, list_sockets)
@@ -430,11 +439,12 @@ class Server(object):
             for client in ready_to_write:
                 if client in self.client_sockets:  # client may have been disconnected
                     self.client_sockets[client].socket_write()
-    # Function 
+                    
+    # Function that returns the client nickname
     def get_client(self, nickname):
         return self.nickname_list.get(nickname)
     
-    # Function 
+    # Function that returns the channel name
     def get_channel(self, channelname):
         if channelname in self.channel_list:
             channel = self.channel_list[channelname]
@@ -443,7 +453,7 @@ class Server(object):
             self.channel_list[channelname] = channel
         return channel
     
-    # Function 
+    # Function that calls change nickname handler 
     def client_changed_nickname(self, client, oldnickname):
         if oldnickname:
             del self.nickname_list[oldnickname]

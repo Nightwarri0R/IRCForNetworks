@@ -311,9 +311,8 @@ class Client(object):
             self.reply("421 %s %s :Unknown command" % (self.nickname, command))
 # END OF command_handler
 
-# Server class
+# Server class which includes server constructor and initialises the attributes of this class
 class Server(object):
-
     def __init__(self):
         self.ip = "127.0.0.1"
         self.port = 6667
@@ -356,10 +355,11 @@ class Server(object):
             for client in ready_to_write:
                 if client in self.client_sockets:  # client may have been disconnected
                     self.client_sockets[client].socket_write()
-
+    # Function 
     def get_client(self, nickname):
         return self.nickname_list.get(nickname)
-
+    
+    # Function 
     def get_channel(self, channelname):
         if channelname in self.channel_list:
             channel = self.channel_list[channelname]
@@ -367,13 +367,14 @@ class Server(object):
             channel = Channel(channelname)
             self.channel_list[channelname] = channel
         return channel
-
+    
+    # Function 
     def client_changed_nickname(self, client, oldnickname):
         if oldnickname:
             del self.nickname_list[oldnickname]
         self.nickname_list[client.nickname] = client
         
-# Channel class which includes channel initiations to create new channels
+# Channel class which includes channel constructor and initialises the attributes of this class
 class Channel(object):
      def __init__(self, name):
         self.name = name

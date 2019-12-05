@@ -274,7 +274,10 @@ All of those commands are stored in a dictionary called handler_table
                 return
             self.send_names(arguments, for_join=True)
 
-        # Automatically run function when user connects
+        """
+        Prompt user for nickname and takes it as an argument.
+        If user does not enter a nickname an error message is displayed.'
+        """
         def nick_handler():
             if len(arguments) < 1:
                 self.reply("431 :No nickname given")
@@ -291,6 +294,10 @@ All of those commands are stored in a dictionary called handler_table
                 self.nickname = newnick
                 server.client_changed_nickname(self, oldnickname)
 
+        """
+        Called when user wants to chat with another user privately, it takes one argument.
+        If user specifies the recipient it allows the users to chat privately.
+        """
         def notice_and_privmsg_handler():
             if len(arguments) == 0:
                 self.reply("411 %s :No recipient given (%s)"
@@ -313,6 +320,10 @@ All of those commands are stored in a dictionary called handler_table
                 self.reply("401 %s %s :No such nick/channel"
                            % (self.nickname, targetname))
 
+        """
+        This function is called when the user wants to leave a channel.
+        If the user is not in that channel it displays an error message.
+        """
         def part_handler():
             if len(arguments) < 1:
                 self.reply_461("PART")
@@ -334,16 +345,22 @@ All of those commands are stored in a dictionary called handler_table
                         True)
                     del self.channels[channelname]
 
+        """
+        Called to check if the connection between the user and the server is stil alive, 
+        takes destination address as an argument.
+        """
         def ping_handler():
             if len(arguments) < 1:
                 self.reply("409 %s :No origin specified" % self.nickname)
                 return
             self.reply("PONG %s :%s" % (server.hostname, arguments[0]))
 
-
+        # This function was not implemented
         def pong_handler():
             pass
 
+
+        # This function handles when a user disconnects from the server 
         def quit_handler():
             if len(arguments) < 1:
                 quitmsg = self.nickname
@@ -351,6 +368,8 @@ All of those commands are stored in a dictionary called handler_table
                 quitmsg = arguments[0]
             self.disconnect(quitmsg)
 
+        # Contains the command dictionary that is used to for various functionalities of the channels
+        # Also checks if the command is a valid one
         handler_table = {
             "JOIN": join_handler,
             "NICK": nick_handler,

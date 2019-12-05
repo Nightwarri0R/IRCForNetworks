@@ -194,6 +194,7 @@ while True:
         # Else existing socket is sending a message
         else:
 
+<<<<<<< HEAD
             # Receive message
             message = receive_message(notified_socket)
 
@@ -275,3 +276,210 @@ while True:
 
 
 #Different channels in progress running on different threads 
+=======
+            if for_join:
+                channel.add_member(self)
+                self.channels[channelname] = channel
+                self.message_channel(channel, "JOIN", channelname, True)
+                self.channel_log(channel, "joined", meta=True)
+                if channel.topic:
+                    self.reply("332 %s %s :%s"
+                            % (self.nickname, channel.name, channel.topic))
+                else:
+                    self.reply("331 %s %s :No topic is set"
+                            % (self.nickname, channel.name))
+            names_prefix = "353 %s = %s :" % (self.nickname, channelname)
+            names = ""
+            # Max length: reply prefix ":server_name(space)" plus CRLF in
+            # the end.
+            names_max_len = 512 - (len(server.name) + 2 + 2)
+            for name in sorted(x.nickname for x in channel.members):
+                if not names:
+                    names = names_prefix + name
+                # Using >= to include the space between "names" and "name".
+                elif len(names) + len(name) >= names_max_len:
+                    self.reply(names)
+                    names = names_prefix + name
+                else:
+                    names += " " + name
+            if names:
+                self.reply(names)
+            self.reply("366 %s %s :End of NAMES list"
+                    % (self.nickname, channelname))
+# START OF command_handler
+    def command_handler(self, command, arguments):
+
+        def join_handler():
+            if len(arguments) < 1:
+                self.reply_461("JOIN")
+                return
+            if arguments[0] == "0":
+                for (channelname, channel) in self.channels.items():
+                    self.message_channel(channel, "PART", channelname, True)
+                    self.channel_log(channel, "left", meta=True)
+                    server.remove_member_from_channel(self, channelname)
+                self.channels = {}
+                return
+            self.send_names(arguments, for_join=True)
+
+        def nick_handler():
+            if len(arguments) < 1:
+                self.reply("431 :No nickname given")
+                return
+            newnick = arguments[0]
+            client = server.get_client(newnick)
+            if newnick == self.nickname:
+                pass
+            elif client and client is not self:
+                self.reply("433 %s %s :Nickname is already in use"
+                        % (self.nickname, newnick))
+            else:
+                for x in self.channels.values():
+                    self.channel_log(
+                        x, "changed nickname to %s" % newnick, meta=True)
+                oldnickname = self.nickname
+                self.nickname = newnick
+                server.client_changed_nickname(self, oldnickname)
+
+        def notice_and_privmsg_handler():
+            if len(arguments) == 0:
+                self.reply("411 %s :No recipient given (%s)"
+                        % (self.nickname, command))
+                return
+            if len(arguments) == 1:
+                self.reply("412 %s :No text to send" % self.nickname)
+                return
+            targetname = arguments[0]
+            message = arguments[1]
+            client = server.get_client(targetname)
+            if client:
+                client.message(": %s %s :%s"
+                            % (command, targetname, message))
+            elif server.has_channel(targetname):
+                channel = server.get_channel(targetname)
+                self.message_channel(
+                    channel, command, "%s :%s" % (channel.name, message))
+                self.channel_log(channel, message)
+            else:
+                self.reply("401 %s %s :No such nick/channel"
+                        % (self.nickname, targetname))
+
+        def part_handler():
+            if len(arguments) < 1:
+                self.reply_461("PART")
+                return
+            if len(arguments) > 1:
+                partmsg = arguments[1]
+            else:
+                partmsg = self.nickname
+            for channelname in arguments[0].split(","):
+                if not valid_channel_re.match(channelname):
+                    self.reply_403(channelname)
+                elif not channelname in self.channels:
+                    self.reply("442 %s %s :You're not on that channel"
+                            % (self.nickname, channelname))
+                else:
+                    channel = self.channels[channelname]
+                    self.message_channel(
+                        channel, "PART", "%s :%s" % (channelname, partmsg),
+                        True)
+                    self.channel_log(channel, "left (%s)" % partmsg, meta=True)
+                    del self.channels[channelname]
+                    server.remove_member_from_channel(self, channelname)
+
+        def ping_handler():
+            if len(arguments) < 1:
+                self.reply("409 %s :No origin specified" % self.nickname)
+                return
+            self.reply("PONG %s :%s" % (server.name, arguments[0]))
+
+        def pong_handler():
+            pass
+
+        def quit_handler():
+            if len(arguments) < 1:
+                quitmsg = self.nickname
+            else:
+                quitmsg = arguments[0]
+            self.disconnect(quitmsg)
+
+        handler_table = {
+            "JOIN": join_handler,
+            "NICK": nick_handler,
+            "PART": part_handler,
+            "PING": ping_handler,
+            "PONG": pong_handler,
+            "PRIVMSG": notice_and_privmsg_handler,
+            "QUIT": quit_handler,
+        }
+        server = self.server
+        valid_channel_re = self.valid_channelname_regexp
+        try:
+            handler_table[command]()
+        except KeyError:
+            self.reply("421 %s %s :Unknown command" % (self.nickname, command))
+# END OF command_handler
+# evince - document viewer
+class Server(object):
+
+    def __init__(self):
+        self.ip = "127.0.0.1"
+        self.port = 6667
+        self.channel_list = {}
+        self.rec_buffer = ""
+        self.client_sockets = {}
+        self.nickname_list = {}
+        self.hostname = socket.getfqdn(socket.gethostname())
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.regex = re.compile(r"\r?\n")
+        
+    def run(self):
+        
+        # Setting up server's socket and listening for new connections
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.bind((self.ip, self.port))
+        self.socket.listen()
+        list_sockets = []
+        list_sockets.append(self.socket)
+        self.connect_socket(list_sockets)
+
+    def connect_socket(self, list_sockets):
+
+        while True:
+            ready_to_read, ready_to_write, errorIn = select.select(list_sockets, list_sockets, list_sockets)
+            for client in ready_to_read:
+                if client in self.client_sockets:
+                    #client.socket_readable()
+                    clients = {}
+                else:
+                    connection, address = client.accept()
+                    list_sockets.append(connection)
+                    try:
+                       
+                        connection.send(b'Test 1 ')
+                        print("Accepted connection from %s:%s." % (address[0], address[1]))
+                        #self.reply("Accepted connection from %s:%s." % (address[0], address[1]))
+                        #self.client_sockets[connection].socket_readable()
+                    except socket.error:
+                        try:
+                            connection.close()
+                        except Exception:
+                            pass
+            for client in ready_to_write:
+                if client in self.client_sockets:  # client may have been disconnected
+                    self.client_sockets[client].socket_write()
+
+class Channel(object):
+    def __init__(self, name):
+        self.name = name
+        self.members = {}
+        self.topic = ""
+
+def main():
+
+    myServer = Server()
+    myServer.run()
+
+if __name__== "__main__": # lookup how to run main in python
+    main()
+>>>>>>> parent of 9ec63e5... Merge pull request #9 from Nightwarri0R/costinBranch

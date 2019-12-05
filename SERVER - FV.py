@@ -7,15 +7,17 @@ import errno
 import sys
 import time
 import argparse
-
 # python .\miniircd --debug 
 # dictionary[new_key] = new_thing_in_dictionary
+
+# Client class in the server side is purposed to deal with users and user input, whenever they are connected to the server
 class Client(object):
 
     linesep_regexp = re.compile(r"\r?\n")
     valid_channelname_regexp = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]{0,50}$")
+    
+    # Constructor for the Client class, where required variables are initialised for later use in the class itself
     def __init__(self, server, client_socket):
-
         self.socket = client_socket
         self.server = server
         self.channels = {}
@@ -29,6 +31,11 @@ class Client(object):
         self.handle_command = self.registration_handler
         self.registered = False
     
+    """
+    This function takes user input and separates it with the help of built in regular expression, as well as checks for errors such 
+    as if the user input is an empty string. If not it carries on to search for space and splits from there. 
+    Once that is done the command_handler function is called to check if the given command exists.
+    """
     def parse_read_buffer(self):
         lines = self.linesep_regexp.split(self.rec_buffer)
         self.rec_buffer = lines[-1]
@@ -55,16 +62,25 @@ class Client(object):
             else:
                 self.registration_handler(command, arguments)
 
+    # Takes self parameter, reads the socket from the user and gets the information. That information is then sent to parse function
     def socket_readable(self):
         data = ""
         data = self.socket.recv(1024)
         self.rec_buffer += data.decode()
         self.parse_read_buffer()
 
+    """
+    Takes self paramater and writes encoded data from send(socket) to local variable that is then passed to 
+    write_buffer(socket), which has the information where to send this data.
+    """
     def socket_write(self):
         amountBuffer = self.socket.send(self.write_buffer.encode())
         self.write_buffer = self.write_buffer[amountBuffer:]
 
+    """
+    After all the parsing has been performed the registration_handler checks if it does contain any of the given user commands. 
+    If it does it calls the respective function.
+    """
     def registration_handler(self, command, arguments):
         server = self.server
         if command == "NICK":
@@ -98,43 +114,78 @@ class Client(object):
             self.reply_251()
             self.reply_422()
 
-
-
+    """
+    Function that takes paramaters self, channel, command, message, include_self and allows
+    the user to communicate over the given channel with the present users. It also displays user information.
+    """
     def message_channel(self, channel, command, message, include_self=False):
         line = ":%s!%s@%s %s %s" % (self.nickname, self.user, self.hostname, command, message)
         for client in channel.members.values():
             if client != self or include_self:
                 client.message(line)
 
+    """
+    Takes self and quitmsg parameter. If the user has disconnected, it will display information of
+    the user that just left and remove the client socket. 
+    """
     def disconnect(self, quitmsg):
         self.message("ERROR :%s" % quitmsg)
         self.socket.close()
 
+    """
+    Takes two parameters self and msg. Prints user message, then assigns the outcome from write_buffer function to msg string.
+    """
     def message(self, msg):
         print(msg)
         self.write_buffer += msg + "\r\n"
 
+    """
+    Automatically runs function when user connects and instantly greets the user with "Welcome" and their info.
+    """
     def reply_001(self):
         self.reply(": %s 001 %s : Welcome" % (self.hostname, self.nickname))
 
+    """
+    Automatically runs function when user connects and displays the running version of the server.
+    """"
     def reply_002(self):
         self.reply(": %s 002 %s : Your host is %s, running version 3.0" % (self.hostname, self.nickname, self.hostname))
 
+    """
+    Automatically runs function when user connects, then prints whenever the server is created.
+    """
     def reply_003(self):
         self.reply(": %s 003 %s : The server was created sometime" % (self.hostname, self.nickname))
 
+    """
+    Automatically runs function when user connects, then prints the version of the server.
+    In our case this is just generic statement.
+    """
     def reply_004(self):
         self.reply(": %s 004 %s : %s version 0" % (self.hostname, self.nickname, self.hostname))
 
+    """
+    Automatically runs function when user connects, then displays the current users on the server.
+    """
     def reply_251(self):
         users=0
         for user in self.server.client_sockets:
             users = users + 1
         self.reply(": %s 251 %s : there are %s users" % (self.hostname, self.nickname, users))
 
+    """
+    Automatically runs function when user connects, then prints the message of the day (MOTD).
+    """
     def reply_422(self):
         self.reply(": %s 422 %s : no MOTD" % (self.hostname, self.nickname)) 
     
+    """
+    Method that is used to validate channel names based on user input. First it takes three paramters (self, arguments, for_join), after 
+    that server is class is self referenced after that list length is cheked. If it is less than 0, pass channelNames at possition 0 to the list, and put a comma after it
+    . Where there is comma and if the list size is greater then 1 pass keys list arguments at possiton 1 and write a comma after it    
+    Once that is done it starts to itterate throught the channel list to check th given channel name.
+    def send_names(self, arguments, for_join=False):
+    """
     def send_names(self, arguments, for_join=False):
         server = self.server
         valid_channel_re = self.valid_channelname_regexp
@@ -184,27 +235,39 @@ class Client(object):
                 self.reply(names)
             self.reply("366 %s %s :End of NAMES list"
                        % (self.nickname, channelname))
-    
+            
+
+    # Function that returns the leng of the write_buffer/message to be sent to the user
     def write_queue_size(self):
         return len(self.write_buffer)
     
+    # Assigns the outcome from write_buffer to the msg string
     def message(self, msg):
         self.write_buffer += msg + "\r\n"
 
+    # Sends the message to the users
     def reply(self, msg):
         self.message(":%s %s" % (self.server.hostname, msg))
 
+    # Error checking in the event that channel does not exist
     def reply_403(self, channel):
         self.reply("403 %s %s :No such channel" % (self.nickname, channel))
 
+    # It is triggered when the user has not inputed enough arguments
     def reply_461(self, command):
         nickname = self.nickname or "*"
         self.reply("461 %s %s :Not enough parameters" % (nickname, command))
     
+"""
+Method in our server that does the checking for commands that are used in it and every one of those commands are defined in this function.
+All of those commands are stored in a dictionary called handler_table
+"""
 # START OF command_handler
     def command_handler(self, command, arguments):
         print(command)
         print(arguments)
+        
+        # Creates a new channel or joins existing one. It also deals with users leaving channel
         def join_handler():
             if len(arguments) < 1:
                 self.reply_461("JOIN")
@@ -218,6 +281,7 @@ class Client(object):
                 return
             self.send_names(arguments, for_join=True)
 
+        # Automatically run function when user connects
         def nick_handler():
             if len(arguments) < 1:
                 self.reply("431 :No nickname given")

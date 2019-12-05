@@ -109,9 +109,6 @@ class Client(object):
 
     def disconnect(self, quitmsg):
         self.message("ERROR :%s" % quitmsg)
-        self.server.print_info(
-            "Disconnected connection from %s:%s (%s)." % (
-                self.host, self.port, quitmsg))
         self.socket.close()
         self.server.remove_client(self, quitmsg)
 
@@ -235,9 +232,6 @@ class Client(object):
                 self.reply("433 %s %s :Nickname is already in use"
                            % (self.nickname, newnick))
             else:
-                for x in self.channels.values():
-                    self.channel_log(
-                        x, "changed nickname to %s" % newnick, meta=True)
                 oldnickname = self.nickname
                 self.nickname = newnick
                 server.client_changed_nickname(self, oldnickname)

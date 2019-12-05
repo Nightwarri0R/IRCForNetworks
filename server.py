@@ -150,6 +150,74 @@ class Client(object):
                     % (self.nickname, channelname))
                 continue
 
+
+            # Get user by notified socket, so we will know who sent the message
+            user = clients[notified_socket]
+
+            print(f'Received message from {user["data"].decode("utf-8")}: {message["data"].decode("utf-8")}')
+            
+            # JOIN <channels>
+            # Makes the client join the channels in the comma-separated list <channels>. If the channel(s) do not exist
+            # then they will be created.
+            if message["data"].decode("utf-8").find("JOIN") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #join(channels)
+                break
+
+            # PART <channels>
+            # Causes a user to leave the channels in the comma-separated list <channels>
+            elif message["data"].decode("utf-8").find("PART") != -1:
+                parse = message["data"].decode("utf-8").split(" ", 1)
+                channels = parse[1]
+                #part(channels)
+                break
+
+            # PRIVMSG <msgtarget> <message>
+            # Sends <message> to <msgtarget>, which is usually a user or channel.
+            elif message["data"].decode("utf-8").find("PRIVMSG") != -1:
+              # parse = message["data"].decode("utf-8").split(" ", 2)
+              # target = parse[1]
+              # msg = parse[2]
+                # privatemsg(target, msg)
+              message="whatever"
+              message = message.encode('utf-8')
+              message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+              client_socket.send(user['header'] + user['data'] + message_header + message)
+
+            # QUIT function
+            elif message["data"].decode("utf-8").find("QUIT") != -1:
+                # sys.exit() HAS TO FINISH THE CLIENT FILE NOT SERVER
+                break
+            # LIST function (lists all clients connected to the server)
+            elif message["data"].decode("utf-8").find("LIST") != -1:
+                # sys.exit() HAS TO FINISH THE CLIENT FILE NOT SERVER
+                for client_socket in clients:
+                    clients[client_socket] = user
+                    print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
+
+
+            # Iterate over connected clients and broadcast message
+            for client_socket in clients:
+                # But don't sent it to sender
+                if client_socket != notified_socket:
+
+                    # Send user and message (both with their headers)
+                    # We are reusing here message header sent by sender, and saved username header send by user when he connected
+                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+
+    # It's not really necessary to have this, but will handle some socket exceptions just in case
+    for notified_socket in exception_sockets:
+
+        # Remove from list for socket.socket()
+        sockets_list.remove(notified_socket)
+
+        # Remove from our list of users
+        del clients[notified_socket]
+
+
+#Different channels in progress running on different threads 
+=======
             if for_join:
                 channel.add_member(self)
                 self.channels[channelname] = channel

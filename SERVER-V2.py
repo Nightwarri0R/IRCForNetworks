@@ -9,29 +9,30 @@ import time
 import argparse
 # python .\miniircd --debug 
 # dictionary[new_key] = new_thing_in_dictionary
+#Class object which is purpose is to handle the messaging, channels and users
 class Client(object):
 
-    linesep_regexp = re.compile(r"\r?\n")
-    valid_channelname_regexp = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]{0,50}$")
-    def __init__(self, server, client_socket):
+    linesep_regexp = re.compile(r"\r?\n")                                           # reuglar expression that splits a string after this character "/"                     
+    valid_channelname_regexp = re.compile(r"^[&#+!][^\x00\x07\x0a\x0d ,:]{0,50}$")  #regular expression purposed to validate a channel from the user input
+    def __init__(self, server, client_socket):                                      # self function, containing all the required atrributes for Client class
 
-        self.socket = client_socket
+        self.socket = client_socket                         
         self.server = server
-        self.channels = {}
-        self.host, self.port = client_socket.getpeername()
+        self.channels = {}                                                          #List data type used for storing the channels                                                       
+        self.host, self.port = client_socket.getpeername()                          #Gets the hostname fro
         self.hostname = socket.getfqdn(self.host)
         self.rec_buffer = ""
         self.write_buffer = ""
-        self.nickname = ""
-        self.realname = ""
-        self.user = ""
-        self.handle_command = self.registration_handler
-        self.registered = False
+        self.nickname = ""                                                          #Variable to store users nickaname, which is displayed on the channel
+        self.realname = ""                                                          #Variable to store realname
+        self.user = ""                                                              #Variable to hold user name 
+        self.handle_command = self.registration_handler                             #registration handler is function that deals with newly loged in clients
+        self.registered = False                                                     #Boolean that we used to check if a user is registered later on                                                     
     
-    def write_queue_size(self):
+    def write_queue_size(self):                                                     #Function that returns the size of the write_buffer 
         return len(self.write_buffer)
     
-    def message(self, msg):
+    def message(self, msg):                                                         #Function that gets the                             
         self.write_buffer += msg + "\r\n"
 
     def reply(self, msg):

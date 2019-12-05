@@ -252,7 +252,8 @@ class Client(object):
                 self.channels = {}
                 return
             self.send_names(arguments, for_join=True)
-        '''Automatically run function when user connects '''
+        '''Its called when user enters nick command in the chat, it takes one argument. If user does not enter the new nickname displays the message "no nickname given".
+        If he does then procceds to change the name of te user to the new one'''
         def nick_handler():
             if len(arguments) < 1:
                 self.reply("431 :No nickname given")
@@ -271,7 +272,8 @@ class Client(object):
                 oldnickname = self.nickname
                 self.nickname = newnick
                 server.client_changed_nickname(self, oldnickname)
-
+        '''Its called when user wants to chat with another user privatley , it takes one argument. If user does not enter the a recipient displays the relevant message.
+        If he does then allows the users to chat in privately. The way this command works is takes user name and the message to be sent'''
         def notice_and_privmsg_handler():
             if len(arguments) == 0:
                 self.reply("411 %s :No recipient given (%s)"
@@ -293,7 +295,8 @@ class Client(object):
             else:
                 self.reply("401 %s %s :No such nick/channel"
                            % (self.nickname, targetname))
-
+        '''This function is called when the user wants to leave a channel and the it works is user has to enter part word in the chat.Checks if user has joined
+        a channel and if not then informs them that they are not in any channel yet'''
         def part_handler():
             if len(arguments) < 1:
                 self.reply_461("PART")
@@ -314,17 +317,18 @@ class Client(object):
                         channel, "PART", "%s :%s" % (channelname, partmsg),
                         True)
                     del self.channels[channelname]
-
+        '''It is called to check the connection between the user and the server is stil alive, argument that it takes is destination address'''
         def ping_handler():
             if len(arguments) < 1:
                 self.reply("409 %s :No origin specified" % self.nickname)
                 return
             self.reply("PONG %s :%s" % (server.hostname, arguments[0]))
 
-
+        '''This function has not been used in our server'''
         def pong_handler():
             pass
-
+        '''This function handles when a user is disconnected from the server and  it contains the command dictionary that is used to for various functionalities
+        of the channels. It also check if any user input command is in the dictionary'''
         def quit_handler():
             if len(arguments) < 1:
                 quitmsg = self.nickname
@@ -349,7 +353,7 @@ class Client(object):
             self.reply("421 %s %s :Unknown command" % (self.nickname, command))
 # END OF command_handler
 
-
+''' Server class used for accepting new user and checking '''
 class Server(object):
 
     def __init__(self):

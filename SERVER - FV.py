@@ -110,7 +110,6 @@ class Client(object):
     def disconnect(self, quitmsg):
         self.message("ERROR :%s" % quitmsg)
         self.socket.close()
-        self.server.remove_client(self, quitmsg)
 
     def message(self, msg):
         print(msg)

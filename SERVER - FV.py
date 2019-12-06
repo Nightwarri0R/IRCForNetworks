@@ -391,7 +391,7 @@ Users are connected to the Server class, before starting to create/use channels 
 class Server(object):
     # Server constructor to initialises the attributes of this class
     def __init__(self):
-        self.ip = "127.0.0.1"
+        self.ip = "10.0.42.17"
         self.port = 6667
         self.channel_list = {}
         self.rec_buffer = ""

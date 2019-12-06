@@ -3,11 +3,8 @@ import socket
 import string
 import datetime
 
-# IP Address of Local Host
-# HOST = "127.0.0.1"
-
 # IP Address for the Virtual Machine:
-HOST = " 10.0.42.17"
+HOST = "10.0.42.17"
 
 # default Connection Port
 PORT = 6667

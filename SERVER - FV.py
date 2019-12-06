@@ -249,141 +249,141 @@ class Client(object):
         nickname = self.nickname or "*"
         self.reply("461 %s %s :Not enough parameters" % (nickname, command))
     
-"""
-Method that checks for the commands in messages and handles them.
-All of valid commands are stored in a dictionary called handler_table.
-"""
-# START OF command_handler
-    def command_handler(self, command, arguments):
-        print(command)
-        print(arguments)
-        
-        # Creates a new channel or joins existing one. It also deals with users leaving channel
-        def join_handler():
-            if len(arguments) < 1:
-                self.reply_461("JOIN")
-                return
-            if arguments[0] == "0":
-                for (channelname, channel) in self.channels.items():
-                    self.message_channel(channel, "PART", channelname, True)
-                    self.channel_log(channel, "left", meta=True)
-                    #server.remove_member_from_channel(self, channelname)
-                self.channels = {}
-                return
-            self.send_names(arguments, for_join=True)
+    """
+    Method that checks for the commands in messages and handles them.
+    All of valid commands are stored in a dictionary called handler_table.
+    """
+    # START OF command_handler
+        def command_handler(self, command, arguments):
+            print(command)
+            print(arguments)
 
-        """
-        Prompt user for nickname and takes it as an argument.
-        If user does not enter a nickname an error message is displayed.'
-        """
-        def nick_handler():
-            if len(arguments) < 1:
-                self.reply("431 :No nickname given")
-                return
-            newnick = arguments[0]
-            client = server.get_client(newnick)
-            if newnick == self.nickname:
-                pass
-            elif client and client is not self:
-                self.reply("433 %s %s :Nickname is already in use"
-                           % (self.nickname, newnick))
-            else:
-                oldnickname = self.nickname
-                self.nickname = newnick
-                server.client_changed_nickname(self, oldnickname)
+            # Creates a new channel or joins existing one. It also deals with users leaving channel
+            def join_handler():
+                if len(arguments) < 1:
+                    self.reply_461("JOIN")
+                    return
+                if arguments[0] == "0":
+                    for (channelname, channel) in self.channels.items():
+                        self.message_channel(channel, "PART", channelname, True)
+                        self.channel_log(channel, "left", meta=True)
+                        #server.remove_member_from_channel(self, channelname)
+                    self.channels = {}
+                    return
+                self.send_names(arguments, for_join=True)
 
-        """
-        Called when user wants to chat with another user privately, it takes one argument.
-        If user specifies the recipient it allows the users to chat privately.
-        """
-        def notice_and_privmsg_handler():
-            if len(arguments) == 0:
-                self.reply("411 %s :No recipient given (%s)"
-                           % (self.nickname, command))
-                return
-            if len(arguments) == 1:
-                self.reply("412 %s :No text to send" % self.nickname)
-                return
-            targetname = arguments[0]
-            message = arguments[1]
-            client = server.get_client(targetname)
-            if client:
-                client.message(":%s!%s@%s %s %s :%s"
-                               % (self.nickname, self.user, self.hostname, command, targetname, message))
-            elif targetname in self.channels:
-                channel = server.get_channel(targetname)
-                self.message_channel(
-                    channel, command, "%s :%s" % (channel.name, message))
-            else:
-                self.reply("401 %s %s :No such nick/channel"
-                           % (self.nickname, targetname))
-
-        """
-        This function is called when the user wants to leave a channel.
-        If the user is not in that channel it displays an error message.
-        """
-        def part_handler():
-            if len(arguments) < 1:
-                self.reply_461("PART")
-                return
-            if len(arguments) > 1:
-                partmsg = arguments[1]
-            else:
-                partmsg = self.nickname
-            for channelname in arguments[0].split(","):
-                if not valid_channel_re.match(channelname):
-                    self.reply_403(channelname)
-                elif not channelname in self.channels:
-                    self.reply("442 %s %s :You're not on that channel"
-                               % (self.nickname, channelname))
+            """
+            Prompt user for nickname and takes it as an argument.
+            If user does not enter a nickname an error message is displayed.'
+            """
+            def nick_handler():
+                if len(arguments) < 1:
+                    self.reply("431 :No nickname given")
+                    return
+                newnick = arguments[0]
+                client = server.get_client(newnick)
+                if newnick == self.nickname:
+                    pass
+                elif client and client is not self:
+                    self.reply("433 %s %s :Nickname is already in use"
+                               % (self.nickname, newnick))
                 else:
-                    channel = self.channels[channelname]
+                    oldnickname = self.nickname
+                    self.nickname = newnick
+                    server.client_changed_nickname(self, oldnickname)
+
+            """
+            Called when user wants to chat with another user privately, it takes one argument.
+            If user specifies the recipient it allows the users to chat privately.
+            """
+            def notice_and_privmsg_handler():
+                if len(arguments) == 0:
+                    self.reply("411 %s :No recipient given (%s)"
+                               % (self.nickname, command))
+                    return
+                if len(arguments) == 1:
+                    self.reply("412 %s :No text to send" % self.nickname)
+                    return
+                targetname = arguments[0]
+                message = arguments[1]
+                client = server.get_client(targetname)
+                if client:
+                    client.message(":%s!%s@%s %s %s :%s"
+                                   % (self.nickname, self.user, self.hostname, command, targetname, message))
+                elif targetname in self.channels:
+                    channel = server.get_channel(targetname)
                     self.message_channel(
-                        channel, "PART", "%s :%s" % (channelname, partmsg),
-                        True)
-                    del self.channels[channelname]
+                        channel, command, "%s :%s" % (channel.name, message))
+                else:
+                    self.reply("401 %s %s :No such nick/channel"
+                               % (self.nickname, targetname))
 
-        """
-        Called to check if the connection between the user and the server is stil alive, 
-        takes destination address as an argument.
-        """
-        def ping_handler():
-            if len(arguments) < 1:
-                self.reply("409 %s :No origin specified" % self.nickname)
-                return
-            self.reply("PONG %s :%s" % (server.hostname, arguments[0]))
+            """
+            This function is called when the user wants to leave a channel.
+            If the user is not in that channel it displays an error message.
+            """
+            def part_handler():
+                if len(arguments) < 1:
+                    self.reply_461("PART")
+                    return
+                if len(arguments) > 1:
+                    partmsg = arguments[1]
+                else:
+                    partmsg = self.nickname
+                for channelname in arguments[0].split(","):
+                    if not valid_channel_re.match(channelname):
+                        self.reply_403(channelname)
+                    elif not channelname in self.channels:
+                        self.reply("442 %s %s :You're not on that channel"
+                                   % (self.nickname, channelname))
+                    else:
+                        channel = self.channels[channelname]
+                        self.message_channel(
+                            channel, "PART", "%s :%s" % (channelname, partmsg),
+                            True)
+                        del self.channels[channelname]
 
-        # This function was not implemented
-        def pong_handler():
-            pass
+            """
+            Called to check if the connection between the user and the server is stil alive, 
+            takes destination address as an argument.
+            """
+            def ping_handler():
+                if len(arguments) < 1:
+                    self.reply("409 %s :No origin specified" % self.nickname)
+                    return
+                self.reply("PONG %s :%s" % (server.hostname, arguments[0]))
+
+            # This function was not implemented
+            def pong_handler():
+                pass
 
 
-        # This function handles when a user disconnects from the server 
-        def quit_handler():
-            if len(arguments) < 1:
-                quitmsg = self.nickname
-            else:
-                quitmsg = arguments[0]
-            self.disconnect(quitmsg)
+            # This function handles when a user disconnects from the server 
+            def quit_handler():
+                if len(arguments) < 1:
+                    quitmsg = self.nickname
+                else:
+                    quitmsg = arguments[0]
+                self.disconnect(quitmsg)
 
-        # Contains the command dictionary that is used to for various functionalities of the channels
-        # Also checks if the command is a valid one
-        handler_table = {
-            "JOIN": join_handler,
-            "NICK": nick_handler,
-            "PART": part_handler,
-            "PING": ping_handler,
-            "PONG": pong_handler,
-            "PRIVMSG": notice_and_privmsg_handler,
-            "QUIT": quit_handler,
-        }
-        server = self.server
-        valid_channel_re = self.valid_channelname_regexp
-        try:
-            handler_table[command]()
-        except KeyError:
-            self.reply("421 %s %s :Unknown command" % (self.nickname, command))
-# END OF command_handler
+            # Contains the command dictionary that is used to for various functionalities of the channels
+            # Also checks if the command is a valid one
+            handler_table = {
+                "JOIN": join_handler,
+                "NICK": nick_handler,
+                "PART": part_handler,
+                "PING": ping_handler,
+                "PONG": pong_handler,
+                "PRIVMSG": notice_and_privmsg_handler,
+                "QUIT": quit_handler,
+            }
+            server = self.server
+            valid_channel_re = self.valid_channelname_regexp
+            try:
+                handler_table[command]()
+            except KeyError:
+                self.reply("421 %s %s :Unknown command" % (self.nickname, command))
+    # END OF command_handler
 
 """
 Users are connected to the Server class, before starting to create/use channels and use commands.
